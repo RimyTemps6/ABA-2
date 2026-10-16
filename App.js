@@ -50,7 +50,7 @@ function pct(s){let t={i:0,a:0,e:0};Object.values(s.trials).forEach(a=>a.forEach
 
 /* ---------- Login ---------- */
 function vAuth(){
- return '<span class="logo hero" role="img" aria-label="Tia Tay, Desenvolvimento Infantil e Neurodivergências"></span><h2 style="text-align:center">Tia Tay Coleta</h2><div class="card"><label for="lu">Usuário (nome sem espaços)</label><input id="lu" autocomplete="username"><label for="lp">Senha</label><input id="lp" type="password" autocomplete="current-password"><p class="am" id="am"></p><button class="btn pr big" data-a="login">Entrar</button><p class="mu">Não tem acesso? Peça à Tia Tay para criar seu usuário.</p></div>';
+ return '<span class="logo hero" role="img" aria-label="Tia Tay, Desenvolvimento Infantil e Neurodivergências"></span><h2 style="text-align:center">Tia Tay Coleta</h2><div class="card"><label for="lu">Usuário (nome sem espaços)</label><input id="lu" autocomplete="username"><label for="lp">Senha</label><input id="lp" type="password" autocomplete="current-password"><p class="am" id="am"></p><button class="btn pr big" data-a="login">Entrar</button><p class="mu">Não tem acesso? Peça à Tia Tay para criar seu usuário.</p></div>'+instCard();
 }
 function enter(x){user=x;vk=x.k;db=roleOf(x)==='p'?EMPTY():load(vk);view=roleOf(x)==='p'?'cal':'pac';cur=null;eg=null;ses=null;cth='';finMsg=null;try{localStorage.setItem('abasessao',x.k)}catch(e){}render()}
 async function doLogin(){
@@ -178,7 +178,7 @@ function vCha(){
  return `${ad?'<button class="lnk" data-a="cback">‹ Conversas</button>':''}<div class="chead">${av(other.k,other.name,'lg')}<b>${esc(other.name)}</b></div><div class="msgs">${mm.map(x=>`<div class="bub ${x.from===user.k?'me':'ot'}">${esc(x.txt)}<small>${hm(x.t)}</small></div>`).join('')||'<p class="mu" style="text-align:center">Nenhuma mensagem ainda. Diga olá!</p>'}</div><div class="cbar"><input id="cm" placeholder="Mensagem" autocomplete="off"><button class="btn pr" data-a="send">Enviar</button></div>`;
 }
 function vPer(){
- return `<h2>Meu perfil</h2><div class="card" style="text-align:center">${av(user.k,user.name,'xl')}<h3 style="margin-top:10px">${esc(user.name)}</h3><p class="mu">Usuário: ${esc(user.show)}</p><label class="btn" for="pf" style="display:inline-block;cursor:pointer">Escolher foto</label><input id="pf" type="file" accept="image/*" style="position:absolute;left:-9999px">${foto(user.k)?'<div class="row"><button class="btn" data-a="pdel">Remover foto</button></div>':''}</div>`;
+ return `<h2>Meu perfil</h2><div class="card" style="text-align:center">${av(user.k,user.name,'xl')}<h3 style="margin-top:10px">${esc(user.name)}</h3><p class="mu">Usuário: ${esc(user.show)}</p><label class="btn" for="pf" style="display:inline-block;cursor:pointer">Escolher foto</label><input id="pf" type="file" accept="image/*" style="position:absolute;left:-9999px">${foto(user.k)?'<div class="row"><button class="btn" data-a="pdel">Remover foto</button></div>':''}</div>${instCard()}`;
 }
 function vEq(){
  const hoje=dkey(new Date()),ptn=(d,id)=>{const p=d.patients.find(x=>x.id===id);return p?p.name:'Paciente removido'};
@@ -242,6 +242,7 @@ document.addEventListener('click',e=>{
  else if(a==='cth'||a==='chatwith'){cth=d.k;view='cha'}
  else if(a==='cback')cth='';
  else if(a==='send'){const x=$('#cm').value.trim();if(!x)return;const th=roleOf(user)==='a'?cth:user.k,m=chats();m.push({id:uid(),th,from:user.k,txt:x,t:new Date().toISOString(),r:false});lset('abachat',m);$('#cm').value='';rf0=true}
+ else if(a==='inst'){if(inst){inst.prompt();inst=null}}
  else if(a==='pdel'){try{localStorage.removeItem('abafoto_'+user.k)}catch(er){}}
  else if(a==='aopen'){cur=d.id;eg=null;view='pac'}
  else if(a==='aadd'){const dt=$('#ad').value,tm=$('#ah').value,pid=$('#ap').value;if(!dt||!tm||!pid){$('#am').textContent='Preencha dia, horário e paciente.';return}(db.agenda=db.agenda||[]).push({id:uid(),date:dt,time:tm,pid,note:$('#an').value.trim()});save();cd=dt;const t=new Date(dt+'T00:00:00');cm={y:t.getFullYear(),m:t.getMonth()}}
@@ -272,6 +273,11 @@ addEventListener('storage',e=>{
  if((e.key.startsWith('abacoleta_')||['abausers','abachat','abacom'].includes(e.key))&&!ses&&!typing)render();
 });
 addEventListener('online',render);addEventListener('offline',render);
+let inst=null;
+const instCard=()=>`<div class="card"><h3>Instalar o aplicativo</h3>${inst?'<button class="btn pr big" data-a="inst">Instalar no aparelho</button>':'<p class="mu">No celular, abra o menu do navegador e toque em “Instalar app” ou “Adicionar à tela inicial”. No iPhone, use Compartilhar e depois “Adicionar à Tela de Início”.</p>'}</div>`;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();inst=e;render()});
+addEventListener('appinstalled',()=>{inst=null;render()});
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 try{const o=localStorage.getItem('abacoleta_taynararibeirodasilva');if(o&&!localStorage.getItem('abacoleta_tiatay'))localStorage.setItem('abacoleta_tiatay',o)}catch(e){}
 setInterval(()=>{if(user&&!ses&&['cal','eq'].includes(view)&&!['INPUT','TEXTAREA','SELECT'].includes((document.activeElement||{}).tagName))render()},60000);
 try{const x=allUsers().find(z=>z.k===localStorage.getItem('abasessao'));if(x)enter(x);else render()}catch(e){render()}
